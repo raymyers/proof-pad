@@ -16,7 +16,6 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -28,7 +27,6 @@ import (
 	"syscall"
 	"time"
 
-	"cloud.google.com/go/logging"
 	"github.com/gorilla/websocket"
 )
 
@@ -60,7 +58,6 @@ var instanceStates = make(map[*exec.Cmd]*stats)
 
 var ilog func(string, ...interface{})
 var elog func(string, ...interface{})
-var logger *logging.Logger
 
 const prompt = "\nanUnlikelyStringThatWillNotOccurInUserCodeA39FC0EFB5F42A9EA6B93AC9951A4F838531FEAE79A073DE55E6777A9C864F01\n"
 
@@ -89,12 +86,7 @@ func killAndCleanUp(cmd *exec.Cmd) {
 }
 
 func acl2(w http.ResponseWriter, r *http.Request) {
-	logger.Log(logging.Entry{
-		Severity:    logging.Info,
-		HTTPRequest: &logging.HTTPRequest{Request: r, RemoteIP: r.RemoteAddr},
-	})
-
-	ilog("Starting new request")
+	ilog("Starting new request from %s", r.RemoteAddr)
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -237,25 +229,20 @@ Total sessions: %d`,
 }
 
 func main() {
-	client, err := logging.NewClient(context.Background(), "proof-pad")
-	if err != nil {
-		log.Fatalf("Can't create logging client: %v", err)
-	}
-	defer client.Close()
-	logger = client.Logger("acl2-service")
 	ilog = func(l string, args ...interface{}) {
-		payload := fmt.Sprintf(l, args...)
-		logger.Log(logging.Entry{Payload: payload, Severity: logging.Info})
-		log.Println(payload)
+		log.Printf("[INFO] "+l, args...)
 	}
 	elog = func(l string, args ...interface{}) {
-		payload := fmt.Sprintf(l, args...)
-		logger.Log(logging.Entry{Payload: payload, Severity: logging.Error})
-		log.Println(payload)
+		log.Printf("[ERROR] "+l, args...)
 	}
 
-	log.Printf("Starting up at %s...\n", "0.0.0.0:"+os.Getenv("PORT"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Starting up at %s...\n", "0.0.0.0:"+port)
 	http.HandleFunc("/acl2", acl2)
 	http.HandleFunc("/health", health)
-	log.Print(http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), nil))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
 }
