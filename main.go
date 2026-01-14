@@ -99,7 +99,7 @@ func acl2(w http.ResponseWriter, r *http.Request) {
 	}
 	defer wc.Close()
 
-	cmd := exec.Command("./acl2-8.5/saved_acl2")
+	cmd := exec.Command("/home/acl2/saved_acl2")
 	instanceStates[cmd] = &stats{started: time.Now(), running: running}
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -158,8 +158,13 @@ func acl2(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	done := make(chan struct{})
 	go sendLoop(wc, reader)
-	go receiveLoop(wc, stdin)
+	go func() {
+		receiveLoop(wc, stdin)
+		close(done)
+	}()
+	<-done // Wait for client to disconnect
 }
 
 func sendLoop(wc *websocket.Conn, reader *bufio.Reader) {
@@ -180,7 +185,13 @@ func sendLoop(wc *websocket.Conn, reader *bufio.Reader) {
 		}
 		body = strings.Trim(body, "\n")
 
-		wc.WriteMessage(websocket.TextMessage, []byte(body))
+		// Send JSON response with Kind and Body
+		kind := "SUCCESS"
+		if strings.Contains(body, "ACL2 Error") || strings.Contains(body, "HARD ACL2 ERROR") {
+			kind = "ERROR"
+		}
+		response := fmt.Sprintf(`{"Kind":"%s","Body":%q}`, kind, body)
+		wc.WriteMessage(websocket.TextMessage, []byte(response))
 	}
 }
 
