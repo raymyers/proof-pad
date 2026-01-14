@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build": "parcel build index.html --dist-dir dist",
+    "dev": "parcel index.html"
+  },
   "devDependencies": {
     "@lezer/generator": "^1.2.2",
     "@mdx-js/mdx": "^2.1.1",
