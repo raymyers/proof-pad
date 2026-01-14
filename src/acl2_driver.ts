@@ -20,7 +20,10 @@ export interface Acl2Response {
   Body: string;
 }
 
-const ws = new WebSocket(`wss://acl2-jbhe53iwqa-uc.a.run.app/acl2`);
+// Use same-origin WebSocket connection (works for both Fly.io and local dev)
+const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+const wsUrl = `${wsProtocol}//${window.location.host}/acl2`;
+const ws = new WebSocket(wsUrl);
 
 ws.addEventListener("message", onUpdate);
 ws.addEventListener("close", onUpdate);
