@@ -244,5 +244,16 @@ func main() {
 	log.Printf("Starting up at %s...\n", "0.0.0.0:"+port)
 	http.HandleFunc("/acl2", acl2)
 	http.HandleFunc("/health", health)
+
+	// Serve static frontend files from /static directory
+	staticDir := "./static"
+	if _, err := os.Stat(staticDir); err == nil {
+		fs := http.FileServer(http.Dir(staticDir))
+		http.Handle("/", fs)
+		ilog("Serving static files from %s", staticDir)
+	} else {
+		ilog("Static directory not found, skipping static file serving")
+	}
+
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
 }
