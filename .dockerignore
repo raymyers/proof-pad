@@ -1,0 +1,8 @@
+.git/
+node_modules/
+*.md
+.eslintrc.json
+.eslintignore
+.idx/
+fly.toml
+ingress.yaml
