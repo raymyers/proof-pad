@@ -282,24 +282,24 @@ fly scale memory 4096
 
 ## Implementation Checklist
 
-- [ ] **Phase 1**: Remove Google Cloud dependencies
-  - [ ] Replace `cloud.google.com/go/logging` with standard logging
-  - [ ] Remove HTTP request logging
-  - [ ] Update `go.mod` and `go.sum`
+- [x] **Phase 1**: Remove Google Cloud dependencies
+  - [x] Replace `cloud.google.com/go/logging` with standard logging
+  - [x] Remove HTTP request logging
+  - [x] Update `go.mod` and `go.sum`
   - [ ] Test locally
 
-- [ ] **Phase 2**: Create Fly.io configuration
-  - [ ] Create `fly.toml`
-  - [ ] Create `.dockerignore`
+- [x] **Phase 2**: Create Fly.io configuration
+  - [x] Create `fly.toml`
+  - [x] Create `.dockerignore`
   - [ ] Test Dockerfile locally
 
-- [ ] **Phase 3**: Optimize Docker build
-  - [ ] Convert to multi-stage build
+- [x] **Phase 3**: Optimize Docker build
+  - [x] Convert to multi-stage build
   - [ ] Test build time improvement
 
-- [ ] **Phase 4**: Update frontend
-  - [ ] Make backend URL configurable
-  - [ ] Choose frontend hosting strategy
+- [x] **Phase 4**: Update frontend
+  - [x] Make backend URL configurable (same-origin)
+  - [x] Choose frontend hosting strategy (Fly.io via Go backend)
   - [ ] Test WebSocket connectivity
 
 - [ ] **Phase 5**: Deploy
